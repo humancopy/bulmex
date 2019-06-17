@@ -1,0 +1,2 @@
+msgid "should be at least %{count} character(s)"
+msgstr "should be at least %{count} character(s)"
