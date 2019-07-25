@@ -27,21 +27,36 @@ defmodule Bulmex.Builder do
   """
   @spec build_input(Phoenix.HTML.Form.t, atom, Keyword.t) :: binary
   def build_input(form, field, opts \\ []) do
+    type = guess_input_type(form, field, opts[:as])
     build_wrapper(opts) do
-      [
-        build_label(form, field, opts),
-        build_control(form, field, opts)
-      ]
+      build_label_and_control(type, form, field, opts)
     end
+  end
+
+  defp build_label_and_control(type = :checkbox, form, field, opts) do
+    build_label(form, field, opts) do
+      build_control(type, form, field, opts)
+    end
+  end
+
+  defp build_label_and_control(type, form, field, opts) do
+    [
+      build_label(form, field, opts),
+      build_control(type, form, field, opts)
+    ]
   end
 
   @doc """
   The label tag builder.
   """
   @spec build_label(Phoenix.HTML.Form.t, atom, Keyword.t) :: binary
+  def build_label(form, field, opts, do: do_block) do
+    label(form, field, do_block, label_opts(opts))
+  end
   def build_label(form, field, opts) do
     label(form, field, humanize(field), label_opts(opts))
   end
+
   defp label_opts(opts) do
     opts
     |> Keyword.get(:label, [])
@@ -83,16 +98,18 @@ defmodule Bulmex.Builder do
     form_for(form_data, action, options, fun)
   end
 
-  defp build_control(form, field, opts) do
-    type = guess_input_type(form, field, opts[:as])
+  defp build_control(type = :checkbox, form, field, opts) do
+    input_opts = build_input_opts(type, form, field, opts)
 
-    input_opts =
-      opts
-      |> Keyword.delete(:as)
-      |> Keyword.delete(:wrapper)
-      |> Keyword.delete(:label)
-      |> append_options(class: "#{input_class(type)} #{state_class(form, field)}")
-      |> append_validations(form, field)
+    input = input(type, form, field, input_opts)
+    span  = content_tag(:span, " #{humanize(field)}")
+    error = ErrorHelpers.error_tag(form, field) || ""
+
+    [input, span, error]
+  end
+
+  defp build_control(type, form, field, opts) do
+    input_opts = build_input_opts(type, form, field, opts)
 
     content_tag :div, class: "control" do
       input = input(type, form, field, input_opts)
@@ -100,6 +117,15 @@ defmodule Bulmex.Builder do
 
       [input, error]
     end
+  end
+
+  defp build_input_opts(type, form, field, opts) do
+    opts
+    |> Keyword.delete(:as)
+    |> Keyword.delete(:wrapper)
+    |> Keyword.delete(:label)
+    |> append_options(class: "#{input_class(type)} #{state_class(form, field)}")
+    |> append_validations(form, field)
   end
 
   defp input(:select, form, field, input_opts) do
