@@ -23,6 +23,22 @@ defmodule Bulmex.Builder do
   end
 
   @doc """
+  The link button tag builder.
+  """
+  @spec build_link_button(String.t, String.t, Keyword.t) :: binary
+  def build_link_button(text, to, opts \\ []) do
+    button_opts = opts
+    |> Keyword.delete(:wrapper)
+    |> append_options(class: "button", href: to)
+
+    build_wrapper(opts) do
+      content_tag :div, class: "control" do
+        content_tag(:a, text, button_opts)
+      end
+    end
+  end
+
+  @doc """
   The input tag builder.
   """
   @spec build_input(Phoenix.HTML.Form.t, atom, Keyword.t) :: binary

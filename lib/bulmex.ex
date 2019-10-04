@@ -46,7 +46,7 @@ defmodule Bulmex do
     iex> Phoenix.HTML.safe_to_string(bulma_button("Hello", class: "is-danger"))
     "<div class=\"field\"><div class=\"control\"><button class=\"is-danger button\">Hello</button></div></div>"
   """
-  @spec bulma_button(Keyword.t) :: binary
+  @spec bulma_button(String.t, Keyword.t) :: binary
   def bulma_button(text, options \\ []) do
     build_button(text, options)
   end
@@ -57,20 +57,20 @@ defmodule Bulmex do
     iex> Phoenix.HTML.safe_to_string(bulma_submit("Hello"))
     "<div class=\"field\"><div class=\"control\"><button class=\"is-primary button\">Hello</button></div></div>"
   """
-  @spec bulma_submit(Keyword.t) :: binary
+  @spec bulma_submit(String.t, Keyword.t) :: binary
   def bulma_submit(text, options \\ []) do
     build_button(text, options |> append_options(class: "is-primary"))
   end
 
   @doc ~S"""
-  Creates a button element.
+  Creates a cancel link button element.
 
-    iex> Phoenix.HTML.safe_to_string(bulma_cancel("Hello"))
-    "<div class=\"field\"><div class=\"control\"><button class=\"is-text button\">Hello</button></div></div>"
+    iex> Phoenix.HTML.safe_to_string(bulma_cancel("Hello", "#back"))
+    "<div class=\"field\"><div class=\"control\"><a class=\"is-text button\" href=\"#back\">Hello</a></div></div>"
   """
-  @spec bulma_cancel(Keyword.t) :: binary
-  def bulma_cancel(text, options \\ []) do
-    build_button(text, options |> append_options(class: "is-text"))
+  @spec bulma_cancel(String.t, String.t, Keyword.t) :: binary
+  def bulma_cancel(text, to, options \\ []) do
+    build_link_button(text, to, options |> append_options(class: "is-text"))
   end
 
   @doc """
